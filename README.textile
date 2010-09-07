@@ -1,0 +1,34 @@
+h1. JGoogleAnalyticsTracker
+
+h2. Introduction
+
+p. JGoogleAnalyticsTracker is a very lightweight java library (it only contains 5 classes) for sending out Google tracking data.  I developed it so I could use Google's fantastic analytics software on java gui applications, as Google never made a java implementation for sending tracking data.
+
+p. Currently the library supports page view tracking (which can have a referrer from a page or a search engine) and event tracking.  See the usage section for a basic setup (It's very simple).  JGoogleAnalyticsTracker will also gracefully ignore requests when there is no internet connection.
+
+h2. License
+
+p. See the LICENSE file
+
+h2. Usage
+
+p. This utility is fairly straightforward. First, you make your config data.  @AnayticsConfigData@ automatically populates most of the user information from the client's system, the only thing it can't figure out is the Flash version.
+
+bc.. AnalyticsConfigData config = new AnalyticsConfigData("MyTrackingCode");
+// if you want to set your own config parameters:
+config.setFlashVesion("9.0 r24");
+// etc
+
+p. You set up the @JGoogleAnalyticsTracker@ with the config and a version (right now only 4.7.2, but it's there for future analytics versions):
+
+bc.. JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker(config, GoogleAnalyticsVersion.V_4_7_2);
+
+p. and then you can send tracking data with the @trackPageView@ and @trackEvent@ methods, or make your own request the @makeCustomRequest(AnalyticsRequestData)@ method.  You can track referrals or searches by calling the @trackPageViewFromReferrer@ or @trackPageViewFromSearch@ methods.
+
+p=. For complete documentation, see the "javadocs":http://www.dmurph.com/jgoogleanalyticstracker/index.html , or just view the source, it's very straightforward.  For more information on the tracking parameters take a look at Google's "Troubleshooting Guide":http://code.google.com/apis/analytics/docs/tracking/gaTrackingTroubleshooting.html
+
+h2. Other features
+
+  * The tracker can be enabled/disabled by calling @setEnabled(boolean)@.
+  * The tracker dispatches all tracking requests asynchronously by default, to change call @setAsynchronous(boolean)@.
+  * The cookie data can be reset by calling @resetSession()@.

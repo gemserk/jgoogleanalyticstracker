@@ -23,9 +23,9 @@
 package com.dmurph.tracking;
 
 /**
- * simple uri encoder, from:
+ * simple uri encoder, made from the spec at:
  * http://www.ietf.org/rfc/rfc2396.txt
- * @author daniel
+ * @author Daniel Murphy
  */
 public class URIEncoder {
 

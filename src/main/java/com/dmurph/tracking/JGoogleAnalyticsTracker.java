@@ -59,9 +59,9 @@ import org.slf4j.LoggerFactory;
  * <li>synchronous mode: The HTTP request is sent to GA immediately, before the track
  * method returns.
  * This may slow your application down if GA doesn't respond fast.
- * <li>asynchronous mode: Each track method call creates a new short-lived thread that sends
+ * <li>multi-thread mode: Each track method call creates a new short-lived thread that sends
  * the HTTP request to GA in the background and terminates.
- * <li>queued mode (the default): The track method stores the request in a FIFO and returns
+ * <li>single-thread mode (the default): The track method stores the request in a FIFO and returns
  * immediately. A single long-lived background thread consumes the FIFO content and sends the HTTP
  * requests to GA.
  * </ul>  
@@ -69,7 +69,23 @@ import org.slf4j.LoggerFactory;
  * @author Daniel Murphy, Stefan Brozinski
  */
 public class JGoogleAnalyticsTracker {
-    
+	
+	public static enum DispatchMode {
+		/**
+		 * Each tracking call will wait until the http request
+		 * completes before returning
+		 */
+		SYNCHRONOUS,
+		/**
+		 * Each tracking call spawns a new thread to make the http request
+		 */
+		MULTI_THREAD,
+		/**
+		 * Each tracking request is added to a queue, and a single dispatch thread makes the requests.
+		 */
+		SINGLE_THREAD
+	}
+	
     private static Logger logger = LoggerFactory.getLogger(JGoogleAnalyticsTracker.class);
     private static final ThreadGroup asyncThreadGroup = new ThreadGroup("Async Google Analytics Threads");
     private static long asyncThreadsRunning = 0;
@@ -90,79 +106,62 @@ public class JGoogleAnalyticsTracker {
     private GoogleAnalyticsVersion gaVersion;
     private AnalyticsConfigData configData;
     private IGoogleAnalyticsURLBuilder builder;
+    private DispatchMode mode;
     private boolean enabled;
-    private boolean asynchronous;
-    private boolean queued;
 
     public JGoogleAnalyticsTracker(AnalyticsConfigData argConfigData, GoogleAnalyticsVersion argVersion) {
         gaVersion = argVersion;
         configData = argConfigData;
         createBuilder();
         enabled = true;
-        asynchronous = false;
-        queued = true;
+        mode = DispatchMode.SINGLE_THREAD;
         startBackgroundThread();
     }
     
     /**
-     * Set if the requests are asynchronous (false by default).
-     * Please note that 'asynchronous' and 'queued' are mutually exclusive. 
-     * 
-     * @param asynchronous
+     * Sets the dispatch mode
+     * @see DispatchMode
+     * @param argMode the mode to to put the tracker in.  If this is null, the tracker
+     * defaults to {@link DispatchMode#SINGLE_THREAD}
      */
-    public void setAsynchronous(boolean asynchronous) {
-        this.asynchronous = asynchronous;
-        if (asynchronous) {
-            queued = false;
-        }
-    }
-
-    /**
-     * If the requests are asynchronous (false by default).
-     * 
-     * @return
-     */
-    public boolean isAsynchronous() {
-        return asynchronous;
-    }
-
-    /**
-     * Set if the requests are queued (true by default).
-     * Please note that 'asynchronous' and 'queued' are mutually exclusive. 
-     * 
-     * @param queued
-     */
-    public void setQueued(boolean queued) {
-        this.queued = queued;
-        if (queued) {
-            asynchronous = false;
-        }
-    }
-
-    /**
-     * If the requests are queued (true by default).
-     * 
-     * @return
-     */
-    public boolean isQueued() {
-        return queued;
+    public void setDispatchMode(DispatchMode argMode){
+    	if(argMode == null){
+    		argMode = DispatchMode.SINGLE_THREAD;
+    	}
+    	mode = argMode;
     }
     
     /**
-     * Convenience method to force synchronous mode.
+     * Gets the current dispatch mode.  Default is {@link DispatchMode#SINGLE_THREAD}.
+     * @see DispatchMode
+     * @return
      */
-    public void setSynchronous() {
-        queued = false;
-        asynchronous = false;
+    public DispatchMode getDispatchMode(){
+    	return mode;
     }
     
     /**
-     * Convenience method to query synchronous mode.
-     * 
+     * Convenience method to check if the tracker is in synchronous mode.
      * @return
      */
-    public boolean isSynchronous() {
-        return !(queued || asynchronous);
+    public boolean isSynchronous(){
+    	return mode == DispatchMode.SYNCHRONOUS;
+    }
+    
+    /**
+     * Convenience method to check if the tracker is in single-thread mode
+     * @return
+     */
+    public boolean isSingleThreaded(){
+    	return mode == DispatchMode.SINGLE_THREAD;
+    }
+    
+    /**
+     * Convenience method to check if the tracker is in multi-thread mode
+     * @return
+     */
+    public boolean isMultiThreaded(){
+    	return mode == DispatchMode.MULTI_THREAD;
     }
     
     /**
@@ -410,30 +409,34 @@ public class JGoogleAnalyticsTracker {
         }
         final String url = builder.buildURL(argData);
 
-        if (queued) {
-            synchronized (fifo) {
-                fifo.add(url);
-                fifo.notify();
-            }
-        } else if (asynchronous) {
-            Thread t = new Thread(asyncThreadGroup, "AnalyticsThread-" + asyncThreadGroup.activeCount()) {
-                public void run() {
-                    synchronized (JGoogleAnalyticsTracker.class) {
-                        asyncThreadsRunning++;
-                    }
-                    try {
-                        dispatchRequest(url);
-                    } finally {
+        switch(mode){
+        	case MULTI_THREAD:
+        		Thread t = new Thread(asyncThreadGroup, "AnalyticsThread-" + asyncThreadGroup.activeCount()) {
+                    public void run() {
                         synchronized (JGoogleAnalyticsTracker.class) {
-                            asyncThreadsRunning--;
+                            asyncThreadsRunning++;
+                        }
+                        try {
+                            dispatchRequest(url);
+                        } finally {
+                            synchronized (JGoogleAnalyticsTracker.class) {
+                                asyncThreadsRunning--;
+                            }
                         }
                     }
+                };
+                t.setDaemon(true);
+                t.start();
+                break;
+        	case SYNCHRONOUS:
+        		dispatchRequest(url);
+        		break;
+        	default: // in case it's null, we default to the single-thread
+        		synchronized (fifo) {
+                    fifo.add(url);
+                    fifo.notify();
                 }
-            };
-            t.setDaemon(true);
-            t.start();
-        } else {
-            dispatchRequest(url);
+        		break;
         }
     }
     

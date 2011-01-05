@@ -17,13 +17,13 @@
 		</license>
 	</licenses>
 	<scm>
-		<url>http://github.com/dmurph/JGoogleAnalyticsTracker</url>
-		<connection>scm:git://github.com/dmurph/JGoogleAnalyticsTracker.git</connection>
-		<developerConnection>scm:git:http://dmurph@github.com/dmurph/JGoogleAnalyticsTracker.git</developerConnection>
+		<url>https://code.google.com/p/jgoogleanalyticstracker/source/browse/</url>
+		<connection>scm:svn:http://jgoogleanalyticstracker.googlecode.com/svn</connection>
+		<developerConnection>scm:svn:https://jgoogleanalyticstracker.googlecode.com/svn</developerConnection>
 	</scm>
 	<developers>
 		<developer>
-			<id>dmurph</id>
+			<id>toucansam99</id>
 			<name>Daniel Murphy</name>
 			<email>daniel@dmurph.com</email>
 			<url>http://www.dmurph.com</url>
@@ -116,6 +116,13 @@
 			<version>4.8.1</version>
 			<type>jar</type>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.1</version>
+			<type>jar</type>
+			<scope>compile</scope>
 		</dependency>
 	</dependencies>
 	<reporting>

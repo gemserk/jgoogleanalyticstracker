@@ -25,74 +25,63 @@
  */
 package com.dmurph.tracking.test;
 
+import junit.framework.TestCase;
+
 import com.dmurph.tracking.AnalyticsConfigData;
 import com.dmurph.tracking.JGoogleAnalyticsTracker;
 import com.dmurph.tracking.JGoogleAnalyticsTracker.GoogleAnalyticsVersion;
 
-import junit.framework.TestCase;
-
 /**
  * @author Daniel Murphy
- *
+ * 
  */
 public class TrackingTest extends TestCase {
-	public void testPageView(){
-		JGoogleAnalyticsTracker.DEBUG_PRINT = true;
-		AnalyticsConfigData config = new AnalyticsConfigData("UA-17109202-5");
-		JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker(config, GoogleAnalyticsVersion.V_4_7_2);
-		tracker.trackPageViewFromReferrer("/pagewitheverything.java", "page with everything", "www.dmurph.com", "www.dmurph.com", "/referalSite.html");
-		tracker.trackPageView("/pagewitheverything.java", "page with everything", "www.dmurph.com");
-		tracker.trackPageView("pagewithonlyurl", null, null);
-		tracker.trackPageView("/pagewithtitle", "Page with Title", null);
-		tracker.trackPageView("pagewithtitleandhost", "Page With Title And Host", "pagewithtitlehost");
-		tracker.trackPageViewFromReferrer("pagewithonlyreferrer", null, null, "www.pagewithonlyreferrer.com", "/referalSite2.html");
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
 	
-	public void testEventTracking(){
-		JGoogleAnalyticsTracker.DEBUG_PRINT = true;
-		AnalyticsConfigData config = new AnalyticsConfigData("UA-17109202-5");
-		JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker(config, GoogleAnalyticsVersion.V_4_7_2);
-		tracker.trackEvent("Greetings", "Hello");
-		tracker.trackEvent("Greetings", "Goodbye");
-		tracker.trackEvent("Greetings", "Hello");
-		tracker.trackEvent("Greetings", "Goodbye", "Slap");
-		tracker.trackEvent("Greetings", "Goodbye", "Slap", 3);
-		tracker.trackEvent("Greetings", "Goodbye", "Slap", 4);
-		tracker.trackEvent("Main Page", "Login");
-		tracker.trackEvent("Main Page", "Login");
-		tracker.trackEvent("Main Page", "Login");
-		tracker.trackEvent("Main Page", "Logout");
-		tracker.trackEvent("Main Page", "Timed Out");
-		tracker.trackEvent("Main Page", "Timed Out");
-		tracker.trackEvent("Main Page", "Timed Out");
-		
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void testSearchTracking(){
-		JGoogleAnalyticsTracker.DEBUG_PRINT = true;
-		AnalyticsConfigData config = new AnalyticsConfigData("UA-17109202-5");
-		JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker(config, GoogleAnalyticsVersion.V_4_7_2);
-		
-		tracker.trackPageViewFromSearch("/searchedToPage.java", "Search 1", "www.dmurph.com", "source1", "keywords here1");
-		tracker.trackPageViewFromSearch("/searchedToPage2.java", "Search 2", "www.dmurph.com", "source2", "keywords here2");
-		tracker.trackPageViewFromSearch("/searchedToPage2.java", "Search 2", "www.dmurph.com", "source2", "keywords here3");
-		tracker.trackPageViewFromSearch("/searchedToPage2.java", "Search 2", "www.dmurph.com", "source3", "keywords here2");
-		tracker.trackPageViewFromSearch("/searchedToPage2.java", "Search 3", "www.dmurph.com", "source3", "keywords here2");
+    public void testPageView() {
+        JGoogleAnalyticsTracker.setProxy(System.getenv("http_proxy"));
+        AnalyticsConfigData config = new AnalyticsConfigData("UA-17109202-5");
+        JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker(config, GoogleAnalyticsVersion.V_4_7_2);
+        
+        tracker.trackPageViewFromReferrer("/pagewitheverything.java", "page with everything", "www.dmurph.com", "www.dmurph.com", "/referalSite.html");
+        tracker.trackPageView("/pagewitheverything.java", "page with everything", "www.dmurph.com");
+        tracker.trackPageView("pagewithonlyurl", null, null);
+        tracker.trackPageView("/pagewithtitle", "Page with Title", null);
+        tracker.trackPageView("pagewithtitleandhost", "Page With Title And Host", "pagewithtitlehost");
+        tracker.trackPageViewFromReferrer("pagewithonlyreferrer", null, null, "www.pagewithonlyreferrer.com", "/referalSite2.html");
+        JGoogleAnalyticsTracker.completeBackgroundTasks(1000);
+    }
 
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
+    public void testEventTracking() {
+        JGoogleAnalyticsTracker.setProxy(System.getenv("http_proxy"));
+        AnalyticsConfigData config = new AnalyticsConfigData("UA-17109202-5");
+        JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker(config, GoogleAnalyticsVersion.V_4_7_2);
+        
+        tracker.trackEvent("Greetings", "Hello");
+        tracker.trackEvent("Greetings", "Goodbye");
+        tracker.trackEvent("Greetings", "Hello");
+        tracker.trackEvent("Greetings", "Goodbye", "Slap");
+        tracker.trackEvent("Greetings", "Goodbye", "Slap", 3);
+        tracker.trackEvent("Greetings", "Goodbye", "Slap", 4);
+        tracker.trackEvent("Main Page", "Login");
+        tracker.trackEvent("Main Page", "Login");
+        tracker.trackEvent("Main Page", "Login");
+        tracker.trackEvent("Main Page", "Logout");
+        tracker.trackEvent("Main Page", "Timed Out");
+        tracker.trackEvent("Main Page", "Timed Out");
+        tracker.trackEvent("Main Page", "Timed Out");
+        JGoogleAnalyticsTracker.completeBackgroundTasks(1000);
+    }
+
+    public void testSearchTracking() {
+        JGoogleAnalyticsTracker.setProxy(System.getenv("http_proxy"));
+        AnalyticsConfigData config = new AnalyticsConfigData("UA-17109202-5");
+        JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker(config, GoogleAnalyticsVersion.V_4_7_2);
+
+        tracker.trackPageViewFromSearch("/searchedToPage.java", "Search 1", "www.dmurph.com", "source1", "keywords here1");
+        tracker.trackPageViewFromSearch("/searchedToPage2.java", "Search 2", "www.dmurph.com", "source2", "keywords here2");
+        tracker.trackPageViewFromSearch("/searchedToPage2.java", "Search 2", "www.dmurph.com", "source2", "keywords here3");
+        tracker.trackPageViewFromSearch("/searchedToPage2.java", "Search 2", "www.dmurph.com", "source3", "keywords here2");
+        tracker.trackPageViewFromSearch("/searchedToPage2.java", "Search 3", "www.dmurph.com", "source3", "keywords here2");
+        JGoogleAnalyticsTracker.completeBackgroundTasks(1000);
+    }
 }

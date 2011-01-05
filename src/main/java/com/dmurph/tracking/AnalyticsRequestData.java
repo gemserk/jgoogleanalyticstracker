@@ -69,7 +69,7 @@ public class AnalyticsRequestData {
 	private String utmcmd = "(none)";
 	private String utmcct = null;
 	
-	public void setReferer(String argSite, String argPage){
+	public void setReferrer(String argSite, String argPage){
 		utmcmd = "referral";
 		utmcct = argPage;
 		utmccn = "(referral)";
@@ -77,7 +77,7 @@ public class AnalyticsRequestData {
 		utmctr = null;
 	}
 	
-	public void setSeachReferrer(String argSearchSource, String argSearchKeywords){
+	public void setSearchReferrer(String argSearchSource, String argSearchKeywords){
 		utmcsr = argSearchSource;
 		utmctr = argSearchKeywords;
 		utmcmd = "organic";

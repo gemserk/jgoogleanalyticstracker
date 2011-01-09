@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dmurph</groupId>
 	<artifactId>JGoogleAnalyticsTracker</artifactId>
-	<version>1.1.1-SNAPSHOT</version>
+	<version>1.2.0-SNAPSHOT</version>
 	<name>JGoogleAnalyticsTracker</name>
 	<description>A java library for sending google analytics tracking information.</description>
 	<url>http://github.com/dmurph/JGoogleAnalyticsTracker</url>
@@ -27,6 +27,10 @@
 			<name>Daniel Murphy</name>
 			<email>daniel@dmurph.com</email>
 			<url>http://www.dmurph.com</url>
+		</developer>
+		<developer>
+  			<name>Stefan Brozinski</name>
+  			<email>Stefan.Brozinski@gmx.net</email>
 		</developer>
 	</developers>
 	<build>

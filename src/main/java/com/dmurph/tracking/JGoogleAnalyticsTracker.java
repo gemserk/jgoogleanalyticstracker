@@ -32,7 +32,6 @@ import java.net.Proxy.Type;
 import java.net.SocketAddress;
 import java.net.URL;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Scanner;
 import java.util.regex.MatchResult;
 
@@ -52,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * {@link AnalyticsRequestData#setPageURL(String)} must be populated</li>
  * </ul>
  * See the <a href=http://code.google.com/intl/en-US/apis/analytics/docs/tracking/gaTrackingTroubleshooting.html#gifParameters>
- * Google Troubleshooting Guide</a> for more info on the tracking parameters.
+ * Google Troubleshooting Guide</a> for more info on the tracking parameters (although it doesn't seem to be fully updated).
  * <p>
  * The tracker can operate in three modes:
  * <ul>
@@ -65,7 +64,13 @@ import org.slf4j.LoggerFactory;
  * immediately. A single long-lived background thread consumes the FIFO content and sends the HTTP
  * requests to GA.
  * </ul>  
- * 
+ * </p>
+ * <p>
+ * To halt the background thread safely, use the call {@link #stopBackgroundThread(long)}, where the parameter is the
+ * timeout to wait for any remaining queued tracking calls to be made.  Keep in mind that if new tracking requests are made
+ * after the thread is stopped, they will just be stored in the queue, and will not be sent to GA until the thread is started again with
+ * {@link #startBackgroundThread()} (This is assuming you are in single-threaded mode to begin with).
+ * </p>
  * @author Daniel Murphy, Stefan Brozinski
  */
 public class JGoogleAnalyticsTracker {
@@ -90,7 +95,7 @@ public class JGoogleAnalyticsTracker {
     private static final ThreadGroup asyncThreadGroup = new ThreadGroup("Async Google Analytics Threads");
     private static long asyncThreadsRunning = 0;
     private static Proxy proxy = Proxy.NO_PROXY;
-    private static List<String> fifo = new LinkedList<String>();
+    private static LinkedList<String> fifo = new LinkedList<String>();
     private static Thread backgroundThread = null; // the thread used in 'queued' mode.
     private static boolean backgroundThreadMayRun = false;
     
@@ -110,12 +115,15 @@ public class JGoogleAnalyticsTracker {
     private boolean enabled;
 
     public JGoogleAnalyticsTracker(AnalyticsConfigData argConfigData, GoogleAnalyticsVersion argVersion) {
-        gaVersion = argVersion;
-        configData = argConfigData;
-        createBuilder();
-        enabled = true;
-        mode = DispatchMode.SINGLE_THREAD;
-        startBackgroundThread();
+       this(argConfigData, argVersion, DispatchMode.SINGLE_THREAD);
+    }
+    
+    public JGoogleAnalyticsTracker(AnalyticsConfigData argConfigData, GoogleAnalyticsVersion argVersion, DispatchMode argMode){
+    	 gaVersion = argVersion;
+         configData = argConfigData;
+         createBuilder();
+         enabled = true;
+         setDispatchMode(argMode);
     }
     
     /**
@@ -127,6 +135,9 @@ public class JGoogleAnalyticsTracker {
     public void setDispatchMode(DispatchMode argMode){
     	if(argMode == null){
     		argMode = DispatchMode.SINGLE_THREAD;
+    	}
+    	if(argMode == DispatchMode.SINGLE_THREAD){
+    		startBackgroundThread();
     	}
     	mode = argMode;
     }
@@ -433,9 +444,12 @@ public class JGoogleAnalyticsTracker {
         		break;
         	default: // in case it's null, we default to the single-thread
         		synchronized (fifo) {
-                    fifo.add(url);
+                    fifo.addLast(url);
                     fifo.notify();
                 }
+        		if(!backgroundThreadMayRun){
+        			logger.error("A tracker request has been added to the queue but the background thread isn't running.", url);
+        		}
         		break;
         }
     }
@@ -489,7 +503,7 @@ public class JGoogleAnalyticsTracker {
                                 
                                 if (!fifo.isEmpty()) {
                                     // Get a reference to the oldest element in the FIFO, but leave it in the FIFO until it is processed.
-                                    url = fifo.get(0);
+                                    url = fifo.getFirst();
                                 }
                             }
                             
@@ -499,12 +513,12 @@ public class JGoogleAnalyticsTracker {
                                 } finally {
                                     // Now that we have completed the HTTP request to GA, remove the element from the FIFO.
                                     synchronized (fifo) {
-                                        fifo.remove(0);
+                                        fifo.removeFirst();
                                     }
                                 }
                             }
                         } catch (Exception e) {
-                            // ignore problems
+                        	logger.error("Got exception from dispatch thread",e);
                         }
                     }
                 }
@@ -515,7 +529,7 @@ public class JGoogleAnalyticsTracker {
             backgroundThread.setDaemon(true);
             
             backgroundThread.start();
-        }
+        }        
     }
     
     /**

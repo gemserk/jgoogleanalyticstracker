@@ -127,6 +127,7 @@ public class GoogleAnalyticsV4_7_2 implements IGoogleAnalyticsURLBuilder{
 		String utmcmd = getURIString(argData.getUtmcmd());
 		String utmcct = getURIString(argData.getUtmcct());
 		
+		// yes, this did take a while to figure out
 	    sb.append("&utmcc=__utma%3D"+cookie1+"."+cookie2+"."+now+"."+now+"."+now+"."+"13%3B%2B__utmz%3D"+cookie1+"."+now+".1.1.utmcsr%3D"+utmcsr+"%7Cutmccn%3D"+utmccn+"%7utmcmd%3D"+utmcmd+(utmctr != null?"%7Cutmctr%3D"+utmctr:"")+(utmcct != null?"%7Cutmcct%3D"+utmcct:"")+"%3B&gaq=1");
 	    return sb.toString();
 	}
@@ -177,17 +178,6 @@ public class GoogleAnalyticsV4_7_2 implements IGoogleAnalyticsURLBuilder{
 		}
 		return URIEncoder.encodeURI(argString);
 	}
-	
-//	private String getURLString(String argString){
-//		if(argString == null){
-//			return null;
-//		}
-//		try{
-//			return URLEncoder.encode(argString, "UTF-8");
-//		} catch (UnsupportedEncodingException e) {
-//			throw new RuntimeException(e);
-//		}	
-//	}
 
 	/**
 	 * @see com.dmurph.tracking.IGoogleAnalyticsURLBuilder#resetSession()

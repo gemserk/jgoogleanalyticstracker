@@ -42,6 +42,7 @@ public class AnalyticsConfigData {
     private String colorDepth = null;
     private String userLanguage = null;
     private String flashVersion = null;
+    private String userAgent = null;
 
     /**
      * constructs with the tracking code, and automatically populates most of
@@ -99,6 +100,13 @@ public class AnalyticsConfigData {
     public String getUserLanguage() {
         return userLanguage;
     }
+    
+    /**
+     * @return the user agent used for the network requests
+     */
+    public String getUserAgent() {
+		return userAgent;
+	}
 
     /**
      * Sets the color depth of the user. like 32 bit.
@@ -147,5 +155,9 @@ public class AnalyticsConfigData {
      */
     public void setUserLanguage(String argUserLanguage) {
         userLanguage = argUserLanguage;
+    }
+    
+    public void setUserAgent(String userAgent){
+    	this.userAgent = userAgent;
     }
 }

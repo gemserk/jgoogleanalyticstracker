@@ -419,6 +419,7 @@ public class JGoogleAnalyticsTracker {
             throw new NullPointerException("Class was not initialized");
         }
         final String url = builder.buildURL(argData);
+        final String userAgent = configData.getUserAgent();
 
         switch(mode){
         	case MULTI_THREAD:
@@ -428,7 +429,7 @@ public class JGoogleAnalyticsTracker {
                             asyncThreadsRunning++;
                         }
                         try {
-                            dispatchRequest(url);
+                            dispatchRequest(url,userAgent);
                         } finally {
                             synchronized (JGoogleAnalyticsTracker.class) {
                                 asyncThreadsRunning--;
@@ -440,7 +441,7 @@ public class JGoogleAnalyticsTracker {
                 t.start();
                 break;
         	case SYNCHRONOUS:
-        		dispatchRequest(url);
+        		dispatchRequest(url,userAgent);
         		break;
         	default: // in case it's null, we default to the single-thread
         		synchronized (fifo) {
@@ -454,12 +455,15 @@ public class JGoogleAnalyticsTracker {
         }
     }
     
-    private static void dispatchRequest(String argURL) {
+    private static void dispatchRequest(String argURL, String userAgent) {
         try {
             URL url = new URL(argURL);
             HttpURLConnection connection = (HttpURLConnection)url.openConnection(proxy);
             connection.setRequestMethod("GET");
             connection.setInstanceFollowRedirects(true);
+            if(userAgent!=null){
+            	connection.addRequestProperty("User-Agent", userAgent);
+            }
             connection.connect();
             int responseCode = connection.getResponseCode();
             if (responseCode != HttpURLConnection.HTTP_OK) {
@@ -486,7 +490,7 @@ public class JGoogleAnalyticsTracker {
     /**
      * If the background thread for 'queued' mode is not running, start it now.
      */
-    private synchronized static void startBackgroundThread() {
+    private synchronized  void startBackgroundThread() {
         if (backgroundThread == null) {
             backgroundThreadMayRun = true;
             backgroundThread = new Thread(asyncThreadGroup, "AnalyticsBackgroundThread") {
@@ -509,7 +513,7 @@ public class JGoogleAnalyticsTracker {
                             
                             if (url != null) {
                                 try {
-                                    dispatchRequest(url);
+                                    dispatchRequest(url, JGoogleAnalyticsTracker.this.configData.getUserAgent());
                                 } finally {
                                     // Now that we have completed the HTTP request to GA, remove the element from the FIFO.
                                     synchronized (fifo) {

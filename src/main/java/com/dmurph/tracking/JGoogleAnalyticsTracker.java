@@ -233,7 +233,7 @@ public class JGoogleAnalyticsTracker {
                     proxyAddr = m.group(2);
                 }
                 
-                if ((m.groupCount() >= 4) && (!m.group(4).isEmpty()))  {
+                if ((m.groupCount() >= 4) && (!(m.group(4).length()==0)))  {
                     proxyPort = Integer.parseInt(m.group(4));
                 }
             } finally {

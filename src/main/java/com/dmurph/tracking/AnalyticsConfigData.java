@@ -43,21 +43,29 @@ public class AnalyticsConfigData {
     private String userLanguage = null;
     private String flashVersion = null;
     private String userAgent = null;
+	private VisitorData visitorData;
 
     /**
-     * constructs with the tracking code, and automatically populates most of
-     * the config data from the current system.
+     * constructs with the tracking code and a new visitor data.
      * 
      * @param argTrackingCode
      */
     public AnalyticsConfigData(String argTrackingCode) {
+       this(argTrackingCode,VisitorData.newVisitor());
+    }
+
+    /**
+     * constructs with the tracking code using the provided visitor data.
+     * 
+     * @param argTrackingCode
+     */
+    public AnalyticsConfigData(String argTrackingCode, VisitorData visitorData) {
         if (argTrackingCode == null) {
             throw new RuntimeException("Tracking code cannot be null");
         }
         trackingCode = argTrackingCode;
+        this.visitorData = visitorData;
     }
-
- 
 
     /**
      * @return the colorDepth
@@ -106,6 +114,13 @@ public class AnalyticsConfigData {
      */
     public String getUserAgent() {
 		return userAgent;
+	}
+    
+    /**
+     * @return the visitor data, used to track unique visitors
+     */
+    public VisitorData getVisitorData() {
+		return visitorData;
 	}
 
     /**

@@ -37,12 +37,9 @@ public class GoogleAnalyticsV4_7_2 implements IGoogleAnalyticsURLBuilder{
 
 	private AnalyticsConfigData config;
 	private Random random = new Random((long)(Math.random()*Long.MAX_VALUE));
-	private int cookie1;
-	private int cookie2;
 	
 	public GoogleAnalyticsV4_7_2(AnalyticsConfigData argConfig){
 		config = argConfig;
-		resetSession();
 	}
 
 	/**
@@ -128,7 +125,14 @@ public class GoogleAnalyticsV4_7_2 implements IGoogleAnalyticsURLBuilder{
 		String utmcct = getURIString(argData.getUtmcct());
 		
 		// yes, this did take a while to figure out
-	    sb.append("&utmcc=__utma%3D"+cookie1+"."+cookie2+"."+now+"."+now+"."+now+"."+"13%3B%2B__utmz%3D"+cookie1+"."+now+".1.1.utmcsr%3D"+utmcsr+"%7Cutmccn%3D"+utmccn+"%7Cutmcmd%3D"+utmcmd+(utmctr != null?"%7Cutmctr%3D"+utmctr:"")+(utmcct != null?"%7Cutmcct%3D"+utmcct:"")+"%3B&gaq=1");
+	    int hostnameHash = hostnameHash(argData.getHostName());
+	    int visitorId = config.getVisitorData().getVisitorId();
+	    long timestampFirst = config.getVisitorData().getTimestampFirst();
+		long timestampPrevious=config.getVisitorData().getTimestampPrevious();
+		long timestampCurrent=config.getVisitorData().newRequest();
+		int visits=config.getVisitorData().getVisits();
+	    
+		sb.append("&utmcc=__utma%3D"+hostnameHash+"."+visitorId+"."+timestampFirst+"."+timestampPrevious+"."+timestampCurrent+"."+ visits + "%3B%2B__utmz%3D"+hostnameHash+"."+now+".1.1.utmcsr%3D"+utmcsr+"%7Cutmccn%3D"+utmccn+"%7utmcmd%3D"+utmcmd+(utmctr != null?"%7Cutmctr%3D"+utmctr:"")+(utmcct != null?"%7Cutmcct%3D"+utmcct:"")+"%3B&gaq=1");
 	    return sb.toString();
 	}
 	
@@ -178,12 +182,15 @@ public class GoogleAnalyticsV4_7_2 implements IGoogleAnalyticsURLBuilder{
 		}
 		return URIEncoder.encodeURI(argString);
 	}
+	
+	private int hostnameHash(String hostname){
+		return 999;
+	}
 
 	/**
 	 * @see com.dmurph.tracking.IGoogleAnalyticsURLBuilder#resetSession()
 	 */
 	public void resetSession() {
-		cookie1 = random.nextInt();
-		cookie2 = random.nextInt();
+		config.getVisitorData().resetSession();
 	}
 }

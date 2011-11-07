@@ -30,6 +30,7 @@ import junit.framework.TestCase;
 import com.dmurph.tracking.AnalyticsConfigData;
 import com.dmurph.tracking.JGoogleAnalyticsTracker;
 import com.dmurph.tracking.JGoogleAnalyticsTracker.GoogleAnalyticsVersion;
+import com.dmurph.tracking.system.AWTSystemPopulator;
 
 /**
  * @author Daniel Murphy
@@ -40,6 +41,7 @@ public class TrackingTest extends TestCase {
     public void testPageView() {
         JGoogleAnalyticsTracker.setProxy(System.getenv("http_proxy"));
         AnalyticsConfigData config = new AnalyticsConfigData("UA-17109202-5");
+        AWTSystemPopulator.populateConfigData(config);
         JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker(config, GoogleAnalyticsVersion.V_4_7_2);
         
         tracker.trackPageViewFromReferrer("/pagewitheverything.java", "page with everything", "www.dmurph.com", "www.dmurph.com", "/referalSite.html");
@@ -54,6 +56,7 @@ public class TrackingTest extends TestCase {
     public void testEventTracking() {
         JGoogleAnalyticsTracker.setProxy(System.getenv("http_proxy"));
         AnalyticsConfigData config = new AnalyticsConfigData("UA-17109202-5");
+        AWTSystemPopulator.populateConfigData(config);
         JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker(config, GoogleAnalyticsVersion.V_4_7_2);
         
         tracker.trackEvent("Greetings", "Hello");
@@ -75,6 +78,7 @@ public class TrackingTest extends TestCase {
     public void testSearchTracking() {
         JGoogleAnalyticsTracker.setProxy(System.getenv("http_proxy"));
         AnalyticsConfigData config = new AnalyticsConfigData("UA-17109202-5");
+        AWTSystemPopulator.populateConfigData(config);
         JGoogleAnalyticsTracker tracker = new JGoogleAnalyticsTracker(config, GoogleAnalyticsVersion.V_4_7_2);
 
         tracker.trackPageViewFromSearch("/searchedToPage.java", "Search 1", "www.dmurph.com", "source1", "keywords here1");

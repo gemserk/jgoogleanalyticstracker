@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.dmurph</groupId>
 	<artifactId>JGoogleAnalyticsTracker</artifactId>
@@ -29,8 +30,8 @@
 			<url>http://www.dmurph.com</url>
 		</developer>
 		<developer>
-  			<name>Stefan Brozinski</name>
-  			<email>Stefan.Brozinski@gmx.net</email>
+			<name>Stefan Brozinski</name>
+			<email>Stefan.Brozinski@gmx.net</email>
 		</developer>
 	</developers>
 	<build>
@@ -79,6 +80,15 @@
 				<version>2.3.1</version>
 				<configuration>
 					<compilerVersion>1.5+</compilerVersion>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2.1</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
 				</configuration>
 			</plugin>
 		</plugins>
